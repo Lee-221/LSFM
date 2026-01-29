@@ -6,12 +6,11 @@ from .modules import ImageFeatureEnhancement, MultiScaleFeatureExtraction, SelfA
 
 
 class LSFMModel(pl.LightningModule):
-    """基于LSFM的农作物病虫害检测模型 (3.1)"""
 
     def __init__(self, num_classes, in_channels=3, base_dim=16):
         super().__init__()
         self.save_hyperparameters()
-        # 确保num_classes至少为4
+
         self.num_classes = max(num_classes, 4)
 
         # 初始特征提取
@@ -19,7 +18,7 @@ class LSFMModel(pl.LightningModule):
         self.conv2 = nn.Conv2d(base_dim, base_dim * 2, 3, 2, 1)  # 下采样
         self.conv3 = nn.Conv2d(base_dim * 2, base_dim * 4, 3, 2, 1)  # 下采样
 
-        # 三个核心模块 (按文档顺序)
+        # 三个核心模块 
         self.feature_enhancement = ImageFeatureEnhancement(dim=base_dim * 4)
         self.multi_scale_extraction = MultiScaleFeatureExtraction(dim=base_dim * 4)
         self.attention_allocation = SelfAttentionWeightAllocation(channels=base_dim * 4)
@@ -39,7 +38,7 @@ class LSFMModel(pl.LightningModule):
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
 
-        # 三个核心模块处理 (按文档3.1节顺序)
+        # 三个核心模块处理
         x = self.feature_enhancement(x)  # 图像特征增强
         x = self.multi_scale_extraction(x)  # 多尺度特征提取
         x = self.attention_allocation(x)  # 自注意力权重分配
